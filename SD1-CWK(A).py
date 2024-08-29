@@ -116,7 +116,6 @@ def load_entries_from_file(filename):
             for line in file:
                 entries.append(eval(line.strip()))
     except FileNotFoundError:
-        #print("gtrfd")
         return []
     return entries
 
@@ -197,8 +196,7 @@ def update_entry(entries):
                         print("1. Name")
                         print("2. Researcher")
                         print("3. Data")
-                        #print("4. Update All")
-                        #print("5. Exit")
+                
                         try:
                             update_option = int(input("Input category you want to update : "))
 
@@ -206,13 +204,11 @@ def update_entry(entries):
                                 while True:
         
                                     length = len(entries)
-                                    avai_index = 0
-                                    old_name_found = False
         
                                     if length != 0:
                                         while True:
-                                            print(entries)
-                                            #old_name_found = False
+                                            avai_index = 0
+                                            old_name_found = False
                                             new_name = input("\nEnter new experiment name : ")
 
                                              
@@ -249,8 +245,6 @@ def update_entry(entries):
                                             more_points = input("Do you wish to add more points(Y/N) : ").lower()
                                             if more_points == "n":
                                                 entries[exist_index]["data"] = new_points_list
-                                                    #entries.append({"name": name,"date": date,"researcher": researcher, "data": points_list})
-                                                print(entries)
                                                 return
                             
                                             elif more_points == "y":

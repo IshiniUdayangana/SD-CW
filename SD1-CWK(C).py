@@ -91,11 +91,16 @@ class ResearchDataManager:
     
     
     def save_entries_to_file(self):
-        with open(self.filename, "wb") as file:
-            writer = avro.datafile.DataFileWriter(file, avro.io.DatumWriter(), self.schema)
-            for entry in self.entries:
-                writer.append(entry)
-            writer.close()
+        
+        if len(self.entries) != 0:
+            with open(self.filename, "wb") as file:
+                writer = avro.datafile.DataFileWriter(file, avro.io.DatumWriter(), self.schema)
+                for entry in self.entries:
+                    writer.append(entry)
+                print("Entries saved successfully!")
+                writer.close()
+        else:
+            print("\nNo any entries found to save")
     
     def load_entries_from_file(self):
         
@@ -105,7 +110,21 @@ class ResearchDataManager:
                 self.entries = [entry for entry in reader]
                 reader.close()
         except FileNotFoundError:
-            print("File not found")
+            return []
+
+    def readable_avro(self):
+        if len(self.entries) != 0:
+            with open(self.filename, "rb") as file:
+                reader = avro.datafile.DataFileReader(file, avro.io.DatumReader())
+                for record in reader:
+                    print("name : ", record["experiment_name"])
+                    print("date : ", record["date"])
+                    print("researcher : ", record["researcher"])
+                    print("data points : ", record["data_points"])
+                    print("\n\n")
+                reader.close()
+        else:
+            print("\nNo any data to convert to readable mode")
 
     
     def analyze_data(self):
@@ -159,6 +178,109 @@ class ResearchDataManager:
             if name_found == True:
                 break
 
+    def update_entry(self):
+
+        while True:
+        
+            length = len(self.entries)
+        
+            if length != 0:
+                while True:
+                    exist_index = 0
+                    name_found = False
+                    name = input("\nEnter experiment name to update : ")
+
+                    while exist_index < length:
+                        if self.entries[exist_index]["experiment_name"] == name:
+                            name_found = True
+                            print("1. Name")
+                            print("2. Researcher")
+                            print("3. Data")
+                
+                            try:
+                                update_option = int(input("\nInput category you want to update : "))
+
+                                if update_option == 1:
+                                    while True:
+        
+                                        length = len(self.entries)
+        
+                                        if length != 0:
+                                            while True:
+                                                avai_index = 0
+                                                old_name_found = False
+                                                new_name = input("\nEnter new experiment name : ")
+
+                                             
+
+                                                while avai_index < length:
+                                                    if self.entries[avai_index]["experiment_name"] == new_name:
+                                                        old_name_found = True
+                                                        print("Name has been exist! Please enter a unique name")
+                                                        break
+                                                    else:
+                                                        avai_index += 1
+                                                    
+        
+                                                if old_name_found == False:
+                                                    self.entries[exist_index]["experiment_name"] = new_name
+                                                    print("Name updated")
+                                                    break
+                                                
+                                            if old_name_found == False:
+                                                    return
+                                elif update_option == 2:
+                                    new_researcher = input("Enter new researchser name : ")
+                                    self.entries[exist_index]["researcher"] = new_researcher
+                                    break
+                                
+                                elif update_option == 3:
+                                    new_points_list = []
+                                    while True:
+                                        try:
+                                            new_data = float(input("Input new data points : "))
+                                            new_points_list.append(new_data)  
+                                            print(new_points_list)
+                                            while True:
+                                                more_points = input("Do you wish to add more points(Y/N) : ").lower()
+                                                if more_points == "n":
+                                                    self.entries[exist_index]["data_points"] = new_points_list
+                                                    return
+                            
+                                                elif more_points == "y":
+                                                    break
+                                                else:
+                                                    print("Please input \"y\" or \"N\"")
+                                        
+                                        except ValueError:
+                                            print("Please input numeric values as masurements")
+        
+                    
+                                
+                                else:
+                                    print("Invalid input")
+                                
+                                                
+                            except ValueError:
+                                print("Invalid input. Please re-enter your choice")
+                    
+                        else:
+                            exist_index += 1
+                        
+        
+            
+                    if name_found == True:
+                        break
+                    else:
+                       print("name does not match, Please check and re-enter the name of entry to delete")
+                       break
+            else:
+                print("\nAny data not found to analyze\n ")
+                break
+            if name_found == True:
+                break
+    
+
     def delete_entry(self):
         while True:
         
@@ -207,9 +329,10 @@ def main():
         print("4. Save entries to file")
         print("5. Update a entry")
         print("6. Delete a entry")
-        print("7. Exit")
+        print("7. View entries in readable mode")
+        print("8. Exit")
         
-        choice = input("Enter your choice: ")
+        choice = input("\nEnter your choice: ")
         if choice == '1':
             manager.add_entry()
         elif choice == '2':
@@ -220,13 +343,14 @@ def main():
             manager.save_entries_to_file()
         elif choice == '5':
             manager.update_entry()
-            pass
         elif choice == '6':
             manager.delete_entry()
         elif choice == '7':
+            manager.readable_avro()
+        elif choice == '8':
             break
         else:
-            print("Invalid choice, please try again.")
+            print("\nInvalid choice, please try again.")
 
 if __name__ == "__main__":
     main()
